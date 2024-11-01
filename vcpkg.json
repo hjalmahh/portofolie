@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "test",
+  "dependencies": [
+    "eigen3",
+    "assimp",
+    "imgui",
+    "nlopt",
+    "orocos-kdl",
+    "glfw3"
+  ]
+}
