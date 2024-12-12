@@ -84,8 +84,7 @@ inline std::shared_ptr<ScrewsKinematicsSolver> hardcoded_kr6r_screw_solver()
     double h1 = 0.200;
     double l3 = 0.080;
 
-    Eigen::Matrix4d m = utility::transformation_matrix(utility::rotate_y(-90.0 * utility::deg_to_rad) * utility::rotate_x(0.0 * utility::deg_to_rad) * utility::rotate_z(-90.0 * utility::deg_to_rad),
-                                                           Eigen::Vector3d{l0 + l1 + l2 +l3, 0.0, h1 + h1 +h3});
+    Eigen::Matrix4d m = utility::transformation_matrix(Eigen::Matrix3d::Identity(), Eigen::Vector3d{l0 + l1 + l2 +l3, 0.0, (h1 + h1) +h3});
 
     Simulation::JointLimits limits
         {
@@ -98,12 +97,12 @@ inline std::shared_ptr<ScrewsKinematicsSolver> hardcoded_kr6r_screw_solver()
     return std::make_shared<ScrewsKinematicsSolver>(
             m,
             std::vector<Eigen::VectorXd>{
-                utility::screw_axis({0.0, 0.0, h1}, {0.0, 0.0, 1.0}, 0.0),
+                utility::screw_axis({0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, 0.0),
                 utility::screw_axis({l0, 0.0, h1+h1}, {0.0, 1.0, 0.0}, 0.0),
                 utility::screw_axis({l0+l1, 0.0, h1+h1}, {0.0, 1.0, 0.0}, 0.0),
                 utility::screw_axis({0.0, 0.0, h1+h1+h3}, {1.0, 0.0, 0.0}, 0.0),
-                utility::screw_axis({l0 +l1 + l2, 0.0, h1+h1+h3}, {0.0, 1.0, 0.0}, 0.0),
-                utility::screw_axis({0.0, 0, h1+h1+h3 }, {1.0, 0.0, 0.0}, 0.0)
+                utility::screw_axis({l0 + l1 + l2, 0.0, h1+h1+h3}, {0.0, 1.0, 0.0}, 0.0),
+                utility::screw_axis({0.0, 0.0, h1+h1+h3 }, {1.0, 0.0, 0.0}, 0.0)
             }, limits
         );
     return hardcoded_kr6r_screw_solver();

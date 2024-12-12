@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "app/robotwrapper.h"
 
 #include "app/urdf_loaders.h"
@@ -43,12 +45,19 @@ void render_scene_with_default_tool(std::shared_ptr<AIS4104::RobotWrapper> robot
     scene.render();
 }
 
+
+
+
 int main(int, char **)
 {
+
+
+
     std::filesystem::path kr6_path = "urdf/urdf_files/ros-industrial/kuka_kr6_support/urdf/kr6r900sixx.urdf";
     std::filesystem::path ur3e_path = "urdf/urdf_files/matlab/ur_e_description/urdf/universalUR3e.urdf";
 
-    auto solver = AIS4104::hardcoded_kr6r_tracik_solver();
+
+    auto solver = AIS4104::hardcoded_kr6r_screw_solver();
     auto robot = std::make_shared<AIS4104::RobotWrapper>(AIS4104::load_threepp_robot(kr6_path), solver);
 
     // auto solver = AIS4104::hardcoded_ur3e_tracik_solver();
@@ -58,6 +67,20 @@ int main(int, char **)
 
     // render_scene_without_default_tool(robot, control_iface);
     render_scene_with_default_tool(robot, control_iface);
+
+
+    //----------------------test
+/*
+    Eigen::VectorXd J0(6);
+    J0 << 0, 90, -45, -90, -90, 60; // Joint configuration
+    auto solver = AIS4104::hardcoded_kr6r_tracik_solver();
+    std::cout << solver->fk_solve(J0*AIS4104::utility::deg_to_rad) << std::endl << std::endl;
+
+*/
+
+    //----------------------------------
+
+
 
     return 0;
 }
