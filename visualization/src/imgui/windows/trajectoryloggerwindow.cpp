@@ -11,7 +11,7 @@ TrajectoryLoggerWindow::TrajectoryLoggerWindow(Simulation::RobotControlInterface
 
 TrajectoryLoggerWindow::TrajectoryLoggerWindow(Simulation::RobotControlInterface &control_interface, State state)
     : m_active(false)
-    , m_directory_path('\0')
+    , m_directory_path{'\0'}
     , m_control_interface(control_interface)
 {
     m_active = state.active;

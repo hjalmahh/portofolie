@@ -31,21 +31,28 @@ uint8_t RobotWrapper::joint_count() const
 {
     return m_solver->joint_count();
 }
-
+//source franschesko
 //TASK: Implement the function to calculate the joint positions for the desired tool pose
 // a) Use m_tool_transform to calculate the flange pose required by m_solver.ik_solve()
 // b) Use the m_solver.ik_solve() overload with the solution selector lambda to choose the most desirable IK solution.
 Eigen::VectorXd RobotWrapper::ik_solve_pose(const Eigen::Matrix4d &desired_tool_pose, const Eigen::VectorXd &j0) const
 {
-    return joint_positions();
-}
 
+        Eigen::Matrix4d pose_d = desired_tool_pose * m_tool_transform.inverse();
+        Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0, [&](const std::vector<Eigen::VectorXd> &) { return 0u; });
+
+return joint_positions;
+}
+//source franschesko
 //TASK: Implement the function to calculate the joint positions for the desired flange pose
 // a) Use m_tool_transform to calculate the flange pose required by m_solver.ik_solve()
 // b) Use the m_solver.ik_solve() overload with the solution selector lambda to choose the most desirable IK solution.
 Eigen::VectorXd RobotWrapper::ik_solve_flange_pose(const Eigen::Matrix4d &desired_flange_pose, const Eigen::VectorXd &j0) const
 {
-    return joint_positions();
+    Eigen::Matrix4d pose_d = desired_flange_pose * m_tool_transform.inverse();
+    Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0, [&](const std::vector<Eigen::VectorXd> &) { return 0u; });
+
+    return joint_positions;
 }
 
 Eigen::Matrix4d RobotWrapper::tool_transform() const
@@ -62,38 +69,55 @@ void RobotWrapper::set_tool_transform(Eigen::Matrix4d transform)
 // Relevant variables are m_solver and m_tool_transform.
 Eigen::Matrix4d RobotWrapper::current_pose() const
 {
-    return Eigen::Matrix4d::Identity();
+
+    Eigen::Matrix4d current_tool_pose = m_solver->fk_solve(joint_positions());
+    Eigen::Matrix4d base = m_tool_transform.inverse() * current_tool_pose;
+    return base;
 }
 
 //TASK: Calculate the position of the end effector using forward kinematics.
 // Relevant variables are m_solver and m_tool_transform (or possibly another function of RobotWrapper?).
 Eigen::Vector3d RobotWrapper::current_position() const
-{
-    return Eigen::Vector3d::Zero();
+{   Eigen::Matrix4d pose_cur = Eigen::Matrix4d::Identity()*m_tool_transform.inverse();
+    Eigen::Matrix4d joints = m_solver->fk_solve(joint_positions());
+    Eigen::Matrix4d current_tool_pose = m_tool_transform.inverse() * joints;
+    Eigen::Vector3d position = current_tool_pose.block(0,3, 3, 0);
+    return position;
 }
 
 //TASK: Calculate the orientation of the end effector using forward kinematics and m_solver (or another function of RobotWrapper?).
 Eigen::Vector3d RobotWrapper::current_orientation_zyx() const
 {
+    Eigen::Matrix4d pose_cur = Eigen::Matrix4d::Identity()*m_tool_transform.inverse();
+    Eigen::Matrix4d joints = m_solver->fk_solve(joint_positions());
+    Eigen::Matrix4d current_tool_pose = m_tool_transform.inverse() * joints;
+
     return Eigen::Vector3d::Zero();
 }
 
 //TASK: Calculate the pose of the end effector using forward kinematics and m_solver.
 Eigen::Matrix4d RobotWrapper::current_flange_pose() const
 {
-    return Eigen::Matrix4d::Identity();
+    Eigen::Matrix4d cur_fp = m_solver->fk_solve(joint_positions());
+    return cur_fp;
 }
 
 //TASK: Based on the flange pose, return its linear position.
 Eigen::Vector3d RobotWrapper::current_flange_position() const
 {
-    return Eigen::Vector3d::Zero();
+    Eigen::Matrix4d cur_fp = current_flange_pose();
+    Eigen::Vector3d position = cur_fp.block(1,3,3,1);
+
+    return position;
 }
 
 //TASK: Based on the flange pose, return its orientation in the Euler ZYX representation.
 Eigen::Vector3d RobotWrapper::current_flange_orientation_zyx() const
 {
-    return Eigen::Vector3d::Zero();
+    Eigen::Matrix3d rot_f = current_flange_pose().block<3,3>(0,0);
+   Eigen::Vector3d orientation = utility::euler_zyx_from_rotation_matrix(rot_f);
+
+    return orientation;
 }
 
 const Simulation::JointLimits& RobotWrapper::joint_limits() const

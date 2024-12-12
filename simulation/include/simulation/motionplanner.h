@@ -3,6 +3,8 @@
 
 #include "simulation/trajectorygenerator.h"
 
+#include <memory>
+
 namespace AIS4104::Simulation {
 
 class MotionPlanner

@@ -12,7 +12,7 @@ constexpr double deg2rad = 0.0174532925199433;
 
 ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_ptr<Simulation::Robot> robot)
     : m_active(false)
-    , m_model_path('\0')
+    , m_model_path{'\0'}
     , m_gfx_scale{1.f, 1.f, 1.f}
     , m_gfx_offset{0.f, 0.f, 0.f}
     , m_gfx_euler_zyx{0.f, 0.f, 0.f}
@@ -26,7 +26,7 @@ ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_
 
 ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_ptr<Simulation::Robot> robot, State state)
     : m_active(state.active)
-    , m_model_path('\0')
+    , m_model_path{'\0'}
     , m_gfx_scale(state.gfx_scale)
     , m_gfx_offset(state.gfx_offset)
     , m_gfx_euler_zyx(state.gfx_euler_zyx)

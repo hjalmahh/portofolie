@@ -12,7 +12,7 @@ using namespace AIS4104::Visualization;
 
 WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene)
     : m_active(false)
-    , m_model_path('\0')
+    , m_model_path{'\0'}
     , m_scene(scene)
     , m_gfx_scale{1.f, 1.f, 1.f}
     , m_gfx_offset{0.f, 0.f, 0.f}
@@ -23,7 +23,7 @@ WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene
 
 WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene, State state)
     : m_active(state.active)
-    , m_model_path('\0')
+    , m_model_path{'\0'}
     , m_scene(scene)
     , m_gfx_scale{state.gfx_scale}
     , m_gfx_offset{state.gfx_offset}
