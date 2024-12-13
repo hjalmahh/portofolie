@@ -84,7 +84,7 @@ inline std::shared_ptr<ScrewsKinematicsSolver> hardcoded_kr6r_screw_solver()
     double h1 = 0.200;
     double l3 = 0.080;
 
-    Eigen::Matrix4d m = utility::transformation_matrix(Eigen::Matrix3d::Identity(), Eigen::Vector3d{l0 + l1 + l2 +l3, 0.0, (h1 + h1) +h3});
+    Eigen::Matrix4d m = utility::transformation_matrix(Eigen::Matrix3d::Identity(), Eigen::Vector3d{l0 + l1 + l2 +l3, 0.0, h1 + h1 +h3});
 
     Simulation::JointLimits limits
         {

@@ -38,10 +38,10 @@ uint8_t RobotWrapper::joint_count() const
 Eigen::VectorXd RobotWrapper::ik_solve_pose(const Eigen::Matrix4d &desired_tool_pose, const Eigen::VectorXd &j0) const
 {
 
-        Eigen::Matrix4d pose_d = desired_tool_pose * m_tool_transform.inverse();
-        Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0, [&](const std::vector<Eigen::VectorXd> &) { return 0u; });
+        //Eigen::Matrix4d pose_d = desired_tool_pose * m_tool_transform.inverse();
+        //Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0, [&](const std::vector<Eigen::VectorXd> &) { return 0u; });
 
-return joint_positions;
+return joint_positions();
 }
 //source franschesko
 //TASK: Implement the function to calculate the joint positions for the desired flange pose
@@ -50,7 +50,7 @@ return joint_positions;
 Eigen::VectorXd RobotWrapper::ik_solve_flange_pose(const Eigen::Matrix4d &desired_flange_pose, const Eigen::VectorXd &j0) const
 {
     Eigen::Matrix4d pose_d = desired_flange_pose * m_tool_transform.inverse();
-    Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0, [&](const std::vector<Eigen::VectorXd> &) { return 0u; });
+    Eigen::VectorXd joint_positions = m_solver->ik_solve(pose_d, j0);
 
     return joint_positions;
 }
@@ -70,28 +70,36 @@ void RobotWrapper::set_tool_transform(Eigen::Matrix4d transform)
 Eigen::Matrix4d RobotWrapper::current_pose() const
 {
 
-    Eigen::Matrix4d current_tool_pose = m_solver->fk_solve(joint_positions());
+    /*Eigen::Matrix4d current_tool_pose = m_solver->fk_solve(joint_positions());
     Eigen::Matrix4d base = m_tool_transform.inverse() * current_tool_pose;
-    return base;
+    return base;*/
+    return Eigen::Matrix4d::Identity();
 }
 
 //TASK: Calculate the position of the end effector using forward kinematics.
 // Relevant variables are m_solver and m_tool_transform (or possibly another function of RobotWrapper?).
 Eigen::Vector3d RobotWrapper::current_position() const
-{   Eigen::Matrix4d pose_cur = Eigen::Matrix4d::Identity()*m_tool_transform.inverse();
+{/*
+    Eigen::Matrix4d pose_cur = Eigen::Matrix4d::Identity()*m_tool_transform.inverse();
     Eigen::Matrix4d joints = m_solver->fk_solve(joint_positions());
     Eigen::Matrix4d current_tool_pose = m_tool_transform.inverse() * joints;
     Eigen::Vector3d position = current_tool_pose.block(0,3, 3, 0);
     return position;
+    */
+    return Eigen::Vector3d::Zero();
+
 }
+
 
 //TASK: Calculate the orientation of the end effector using forward kinematics and m_solver (or another function of RobotWrapper?).
 Eigen::Vector3d RobotWrapper::current_orientation_zyx() const
-{
+{/*
     Eigen::Matrix4d pose_cur = Eigen::Matrix4d::Identity()*m_tool_transform.inverse();
     Eigen::Matrix4d joints = m_solver->fk_solve(joint_positions());
     Eigen::Matrix4d current_tool_pose = m_tool_transform.inverse() * joints;
 
+    return Eigen::Vector3d::Zero();
+    */
     return Eigen::Vector3d::Zero();
 }
 
@@ -106,7 +114,7 @@ Eigen::Matrix4d RobotWrapper::current_flange_pose() const
 Eigen::Vector3d RobotWrapper::current_flange_position() const
 {
     Eigen::Matrix4d cur_fp = current_flange_pose();
-    Eigen::Vector3d position = cur_fp.block(1,3,3,1);
+    Eigen::Vector3d position = cur_fp.block<3,1>(0,3);
 
     return position;
 }

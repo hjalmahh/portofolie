@@ -58,6 +58,8 @@ int main(int, char **)
 
 
     auto solver = AIS4104::hardcoded_kr6r_screw_solver();
+    //auto solver = AIS4104::hardcoded_kr6r_tracik_solver();
+
     auto robot = std::make_shared<AIS4104::RobotWrapper>(AIS4104::load_threepp_robot(kr6_path), solver);
 
     // auto solver = AIS4104::hardcoded_ur3e_tracik_solver();

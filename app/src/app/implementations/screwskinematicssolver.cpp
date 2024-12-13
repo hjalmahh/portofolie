@@ -72,8 +72,8 @@ Eigen::VectorXd ScrewsKinematicsSolver::ik_solve(const Eigen::Matrix4d &t_sd, co
     std::pair<Eigen::VectorXd, double> p;
     while ((v_b.head(3).norm() > m_ve) || (v_b.tail(3).norm() > m_we))
     {
-        Eigen::MatrixXd jac = body_jacobian(j0);
-        cu_jp *= jac.completeOrthogonalDecomposition().pseudoInverse() * v_b;
+        Eigen::MatrixXd jac = body_jacobian(cu_jp);
+        cu_jp += jac.completeOrthogonalDecomposition().pseudoInverse() * v_b;
 
         Eigen::Matrix4d t_sb = fk_solve(cu_jp);
         Eigen::Matrix4d t_bd = t_sb.inverse() * t_sd;
@@ -117,7 +117,8 @@ Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &cu
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
     auto [m, screws] = space_chain();
-    const int num_joints = screws.size(); //basere DOF på fuknsjonen som brukes
+    const int num_joints = joint_count(); //basere DOF på fuknsjonen som brukes
+    screws = m_screws;
 
     //6x6 jacobian matrix
     Eigen::MatrixXd jac_space(6, num_joints);
@@ -139,8 +140,8 @@ Eigen::MatrixXd ScrewsKinematicsSolver::body_jacobian(const Eigen::VectorXd &cur
     {
         Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
         auto [m, screws] = body_chain();
-        const int num_joints = screws.size(); //basere DOF på fuknsjonen som brukes
-
+        const int num_joints = joint_count(); //basere DOF på fuknsjonen som brukes
+        screws=m_screws;
         //6x6 jacobian matrix
         Eigen::MatrixXd jac_body(6, num_joints);
         jac_body.setZero();
