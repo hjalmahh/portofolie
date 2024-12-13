@@ -27,7 +27,7 @@ Eigen::VectorXd screw_axis(const Eigen::Vector3d &w, const Eigen::Vector3d &v);
 Eigen::VectorXd screw_axis(const Eigen::Vector3d &q, const Eigen::Vector3d &s, double h);
 
 Eigen::Matrix3d matrix_exponential(const Eigen::Vector3d &w, double theta);
-Eigen::Matrix4d matrix_expoonential(const Eigen::Vector3d &w, const Eigen::Vector3d &v, double theta);
+Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector3d &v, double theta);
 Eigen::Matrix4d matrix_exponential(const Eigen::VectorXd &screw, double theta);
 
 std::pair<Eigen::Vector3d, double> matrix_logarithm(const Eigen::Matrix3d &r);

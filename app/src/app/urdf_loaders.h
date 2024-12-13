@@ -1,6 +1,10 @@
 #ifndef AIS4104_URDF_LOADERS_H
 #define AIS4104_URDF_LOADERS_H
 
+#include "app/examples/tracikkinematicssolver.h"
+
+#include "app/implementations/screwskinematicssolver.h"
+
 #include <trac_ik/trac_ik.hpp>
 
 #include <threepp/objects/Robot.hpp>
@@ -27,13 +31,13 @@ inline std::shared_ptr<threepp::Robot> load_threepp_robot(const std::filesystem:
 }
 
 //TASK: Write a function or class that constructs the screws and zero configuration pose matrix M from the specified URDF path
-inline std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> load_robot_chain_screws(const std::filesystem::path &urdf_path)
+inline std::shared_ptr<ScrewsKinematicsSolver> load_robot_chain_screws(const std::filesystem::path &urdf_path)
 {
     return {};
 }
 
 //TASK: Write a function or class that creates the KDL kinematic chain from the specified URDF path
-inline std::shared_ptr<KDL::Chain> load_robot_chain_kdl(const std::filesystem::path &urdf_path)
+inline std::shared_ptr<TracIkKinematicsSolver> load_robot_chain_kdl(const std::filesystem::path &urdf_path)
 {
     return nullptr;
 }

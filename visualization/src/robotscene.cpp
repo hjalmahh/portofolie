@@ -4,29 +4,41 @@
 
 using namespace AIS4104::Visualization;
 
-namespace tpp = threepp;
+constexpr float frustum_size = 5.f;
 
-RobotScene::RobotScene(std::shared_ptr<threepp::Robot> robot, std::vector<std::shared_ptr<ImguiWindow>> imgui_items)
-    : m_robot(std::move(robot))
+RobotScene::RobotScene(std::shared_ptr<threepp::Robot> robot, std::vector<std::shared_ptr<ImguiWindow>> imgui_items, Projection projection)
+    : m_projection(projection)
+    , m_robot(std::move(robot))
 {
-    std::unordered_map<std::string, tpp::Canvas::ParameterValue> params{{"aa", 4}};
-    m_canvas = std::make_unique<tpp::Canvas>("Robot renderer", params);
+    std::unordered_map<std::string, threepp::Canvas::ParameterValue> params{{"aa", 4}};
+    m_canvas = std::make_unique<threepp::Canvas>("Robot renderer", params);
     m_imgui = std::make_shared<ImguiWindowContext>(*m_canvas, std::move(imgui_items));
 
-    m_renderer = std::make_unique<tpp::GLRenderer>(m_canvas->size());
-    m_renderer->setClearColor(tpp::Color::aliceblue);
+    m_renderer = std::make_unique<threepp::GLRenderer>(m_canvas->size());
+    m_renderer->setClearColor(threepp::Color::aliceblue);
 
     setup_scene();
 
-    m_capture = std::make_unique<tpp::IOCapture>();
+    m_capture = std::make_unique<threepp::IOCapture>();
     m_capture->preventMouseEvent = []
     {
         return ImGui::GetIO().WantCaptureMouse;
     };
     m_canvas->setIOCapture(m_capture.get());
-    m_canvas->onWindowResize([&](tpp::WindowSize size)
+    m_canvas->onWindowResize([&](threepp::WindowSize size)
         {
-            m_camera->aspect = size.aspect();
+            if(m_projection == Projection::PERSPECTIVE)
+            {
+                static_cast<threepp::PerspectiveCamera&>(*m_camera).aspect = size.aspect();
+            }
+            else
+            {
+                auto &camera = static_cast<threepp::OrthographicCamera&>(*m_camera);
+                camera.left = -frustum_size * size.aspect() / 2.f;
+                camera.right = frustum_size * size.aspect() / 2.f;
+                camera.top = frustum_size / 2.f;
+                camera.bottom = -frustum_size / 2.f;
+            }
             m_camera->updateProjectionMatrix();
             m_renderer->setSize(size);
         }
@@ -38,6 +50,16 @@ RobotScene::~RobotScene()
     if(m_canvas->isOpen())
         m_canvas->close();
     m_imgui.reset();
+}
+
+void RobotScene::show_grid(bool show)
+{
+    m_gridhelper->visible = show;
+}
+
+void RobotScene::set_background_color(threepp::Color color)
+{
+    m_scene->background = color;
 }
 
 void RobotScene::set_tool(std::shared_ptr<threepp::Object3D> tool)
@@ -98,12 +120,12 @@ const threepp::Robot& RobotScene::robot() const
 void RobotScene::render() const
 {
     m_imgui->initialize();
-    tpp::Clock clock;
+    threepp::Clock clock;
     m_canvas->animate([&]()
         {
             if(m_tool != nullptr)
             {
-                tpp::Matrix4 t_sb = m_robot->computeEndEffectorTransform(m_robot->jointValuesWithConversionFromRadiansToDeg(), true);
+                threepp::Matrix4 t_sb = m_robot->computeEndEffectorTransform(m_robot->jointValuesWithConversionFromRadiansToDeg(), true);
                 m_tool->position.setFromMatrixPosition(t_sb);
                 m_tool->quaternion.setFromRotationMatrix(t_sb.multiply(m_tool_tf));
             }
@@ -115,7 +137,7 @@ void RobotScene::render() const
 
 void RobotScene::setup_scene()
 {
-    m_scene = tpp::Scene::create();
+    m_scene = threepp::Scene::create();
     add_scene_grid();
     add_camera();
     add_scene_objects();
@@ -123,28 +145,40 @@ void RobotScene::setup_scene()
 
 void RobotScene::add_scene_grid()
 {
-    float size = 10.f;
-    auto material = tpp::ShadowMaterial::create();
-    auto plane = tpp::Mesh::create(tpp::PlaneGeometry::create(size, size), material);
-    plane->rotation.y = -tpp::math::PI / 2.f;
+    auto size = 10.f;
+    auto material = threepp::ShadowMaterial::create();
+    auto plane = threepp::Mesh::create(threepp::PlaneGeometry::create(size, size), material);
+    plane->rotation.y = -threepp::math::PI / 2.f;
     plane->receiveShadow = true;
 
-    auto grid = tpp::GridHelper::create(size, size, tpp::Color::yellowgreen);
-    grid->rotation.y = tpp::math::PI / 2.f;
-    plane->add(grid);
-    m_scene->add(grid);
+    m_gridhelper = threepp::GridHelper::create(size, size, threepp::Color::yellowgreen);
+    m_gridhelper->rotation.y = threepp::math::PI / 2.f;
+    plane->add(m_gridhelper);
+    m_scene->add(m_gridhelper);
 }
 
 void RobotScene::add_camera()
 {
-    m_camera = tpp::PerspectiveCamera::create(75.f, m_canvas->aspect(), 0.1f, 100.f);
+    if(m_projection == Projection::PERSPECTIVE)
+        m_camera = threepp::PerspectiveCamera::create(75.f, m_canvas->aspect(), 0.1f, 100.f);
+    else
+    {
+        m_camera = threepp::OrthographicCamera::create(
+            -(frustum_size * m_canvas->aspect()) / 2.f,
+            (frustum_size * m_canvas->aspect()) / 2.f,
+            frustum_size / 2.f,
+            -frustum_size / 2.f,
+            0.1f,
+            100.f
+        );
+    }
     m_camera->position.set(0.f, 1.25f, 1.f);
-    m_controls = std::make_unique<tpp::OrbitControls>(*m_camera, *m_canvas);
+    m_controls = std::make_unique<threepp::OrbitControls>(*m_camera, *m_canvas);
 }
 
 void RobotScene::add_scene_objects()
 {
-    auto light = tpp::HemisphereLight::create(tpp::Color::aliceblue, tpp::Color::grey);
+    auto light = threepp::HemisphereLight::create(threepp::Color::aliceblue, threepp::Color::grey);
     m_scene->add(light);
     m_scene->add(*m_robot);
     // m_scene->add(*m_tool);

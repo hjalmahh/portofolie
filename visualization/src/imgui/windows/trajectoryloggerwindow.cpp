@@ -11,12 +11,12 @@ TrajectoryLoggerWindow::TrajectoryLoggerWindow(Simulation::RobotControlInterface
 
 TrajectoryLoggerWindow::TrajectoryLoggerWindow(Simulation::RobotControlInterface &control_interface, State state)
     : m_active(false)
-    , m_directory_path{'\0'}
+    , m_directory_path('\0')
     , m_control_interface(control_interface)
 {
     m_active = state.active;
     std::string directory = state.directory.string();
-    strcpy_s(m_directory_path, sizeof(m_directory_path), &directory[0]);
+    std::strncpy(m_directory_path, &directory[0], sizeof(m_directory_path));
     m_control_interface.set_logger_parameters(state);
 }
 

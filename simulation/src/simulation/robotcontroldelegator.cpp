@@ -9,10 +9,10 @@
 using namespace AIS4104::Simulation;
 
 RobotControlDelegator::RobotControlDelegator(std::shared_ptr<Robot> robot, std::shared_ptr<KinematicsSolver> kinematics_solver, std::shared_ptr<MotionPlanner> motion_planner)
-: m_robot(std::move(robot))
-, m_motion_planner(std::move(motion_planner))
-, m_kinematics_solver(std::move(kinematics_solver))
-, m_trajectory_executor(std::make_shared<TrajectoryExecutor>(m_robot))
+    : m_robot(std::move(robot))
+    , m_motion_planner(std::move(motion_planner))
+    , m_kinematics_solver(std::move(kinematics_solver))
+    , m_trajectory_executor(std::make_shared<TrajectoryExecutor>(m_robot))
 {
 }
 

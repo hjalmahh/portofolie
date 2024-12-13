@@ -33,7 +33,8 @@ uint32_t ScrewsKinematicsSolver::joint_count() const
 Eigen::Matrix4d ScrewsKinematicsSolver::fk_solve(const Eigen::VectorXd &joint_positions)
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-
+   //Eigen::VectorXd joint_positions = joint_count();
+    //auto[m, space_screw] = space_chain();
     for (uint32_t i = 0; i < joint_count(); ++i)
     {
         Eigen::VectorXd s = m_screws[i];
@@ -79,12 +80,10 @@ Eigen::VectorXd ScrewsKinematicsSolver::ik_solve(const Eigen::Matrix4d &t_sd, co
         std::tie(v_b, theta) = utility::matrix_logarithm(t_bd);
         v_b *= theta;
 
-        /*if (iter_count > max_iter)
+        if (++iter_count > max_iter)
         {
-            return std::make_pair(iter_count, cu_jp);
+            throw std::runtime_error("maximum iterations.");
         }
-
-        iter_count++;*/
 
     }
     return cu_jp;
@@ -114,7 +113,7 @@ std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> ScrewsKinematicsSolver:
 Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &current_joint_positions)
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-    std::tie(m_m, m_screws) = space_chain();
+    auto [m, screws] = space_chain();
     //const int num_joints = screws.size(); //basere DOF på fuknsjonen som brukes
 
     //6x6 jacobian matrix
@@ -124,8 +123,8 @@ Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &cu
 ;
     for (int i = 0; i < joint_count(); i++)
     {
-        T = T * utility::matrix_exponential(m_screws[i], current_joint_positions[i]);
-        jac_space.col(i) = utility::adjoint_matrix(T) * m_screws[i];
+        T = T * utility::matrix_exponential(screws[i], current_joint_positions[i]);
+        jac_space.col(i) = utility::adjoint_matrix(T) * screws[i];
     }
     return jac_space;
 }

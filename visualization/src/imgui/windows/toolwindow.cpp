@@ -12,7 +12,7 @@ constexpr double deg2rad = 0.0174532925199433;
 
 ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_ptr<Simulation::Robot> robot)
     : m_active(false)
-    , m_model_path{'\0'}
+    , m_model_path('\0')
     , m_gfx_scale{1.f, 1.f, 1.f}
     , m_gfx_offset{0.f, 0.f, 0.f}
     , m_gfx_euler_zyx{0.f, 0.f, 0.f}
@@ -26,7 +26,7 @@ ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_
 
 ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_ptr<Simulation::Robot> robot, State state)
     : m_active(state.active)
-    , m_model_path{'\0'}
+    , m_model_path('\0')
     , m_gfx_scale(state.gfx_scale)
     , m_gfx_offset(state.gfx_offset)
     , m_gfx_euler_zyx(state.gfx_euler_zyx)
@@ -36,7 +36,7 @@ ToolConfigurationWindow::ToolConfigurationWindow(RobotScene &scene, std::shared_
     , m_tool_view(state.selected_view, {std::make_pair(ToolView::KINEMATICS_TFX, "Kinematics transform"), std::make_pair(ToolView::GFX_TFX, "Graphics transform"), std::make_pair(ToolView::LOAD_STL, "Load .stl")})
     , m_robot(std::move(robot))
 {
-    strcpy_s(m_model_path, sizeof(m_model_path), &state.model_path[0]);
+    std::strncpy(m_model_path, &state.model_path[0], sizeof(m_model_path));
 }
 
 ToolConfigurationWindow::State ToolConfigurationWindow::state() const
@@ -65,7 +65,7 @@ void ToolConfigurationWindow::render()
             else
                 activate_custom_tool();
         }
-        ImGui::Text((std::string("Loaded model: ") + m_model_path).c_str());
+        ImGui::Text("Loaded model: %s", m_model_path);
     }
 
     int selected_type = m_tool_view.value_index();

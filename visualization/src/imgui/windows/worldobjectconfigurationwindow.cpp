@@ -12,7 +12,7 @@ using namespace AIS4104::Visualization;
 
 WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene)
     : m_active(false)
-    , m_model_path{'\0'}
+    , m_model_path('\0')
     , m_scene(scene)
     , m_gfx_scale{1.f, 1.f, 1.f}
     , m_gfx_offset{0.f, 0.f, 0.f}
@@ -23,14 +23,14 @@ WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene
 
 WorldObjectConfigurationWindow::WorldObjectConfigurationWindow(RobotScene &scene, State state)
     : m_active(state.active)
-    , m_model_path{'\0'}
+    , m_model_path('\0')
     , m_scene(scene)
     , m_gfx_scale{state.gfx_scale}
     , m_gfx_offset{state.gfx_offset}
     , m_gfx_euler_zyx{state.gfx_euler_zyx}
     , m_world_view(state.selected_view, {std::make_pair(WorldView::TRANSFORM, "Transform"), std::make_pair(WorldView::LOAD_STL, "Load .stl")})
 {
-    strcpy_s(m_model_path, sizeof(m_model_path), &state.model_path[0]);
+    std::strncpy(m_model_path, &state.model_path[0], sizeof(m_model_path));
 }
 
 WorldObjectConfigurationWindow::State WorldObjectConfigurationWindow::state() const
@@ -63,7 +63,7 @@ void WorldObjectConfigurationWindow::render()
                 m_world_view = WorldView::LOAD_STL;
             }
         }
-        ImGui::Text((std::string("Loaded model: ") + m_model_path).c_str());
+        ImGui::Text("Loaded model: %s", m_model_path);
     }
 
     if(m_world_view == WorldView::TRANSFORM)
@@ -127,7 +127,7 @@ void WorldObjectConfigurationWindow::assign_gfx_transform()
     threepp::Vector3 offset(m_gfx_offset.x(), m_gfx_offset.y(), m_gfx_offset.z());
     m_world_object->scale = scale;
     m_world_object->position = offset;
-    m_world_object->rotation = threepp::Euler().setFromRotationMatrix(world_object_tf);
+    m_world_object->setRotationFromMatrix(world_object_tf);
 }
 
 void WorldObjectConfigurationWindow::activate_loaded_world_object()
