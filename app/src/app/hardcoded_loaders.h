@@ -105,7 +105,6 @@ inline std::shared_ptr<ScrewsKinematicsSolver> hardcoded_kr6r_screw_solver()
                 utility::screw_axis({0.0, 0.0, h1+h1+h3 }, {1.0, 0.0, 0.0}, 0.0)
             }, limits
         );
-    return hardcoded_kr6r_screw_solver();
 }
 
 //TASK: Kinematic modeling of the KUKA KR 6 r900 sixx using Trac IK and KDL.

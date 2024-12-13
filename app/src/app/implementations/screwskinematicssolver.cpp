@@ -65,14 +65,12 @@ Eigen::VectorXd ScrewsKinematicsSolver::ik_solve(const Eigen::Matrix4d &t_sd, co
     Eigen::Matrix4d t_bd = (t_sb).inverse() * t_sd;
     std::tie(v_b, theta) = utility::matrix_logarithm(t_bd);
     v_b *= theta;
-    Eigen::MatrixXd jac_body;
-
-
+    Eigen::MatrixXd jac;
 
     std::pair<Eigen::VectorXd, double> p;
     while ((v_b.head(3).norm() > m_ve) || (v_b.tail(3).norm() > m_we))
     {
-        Eigen::MatrixXd jac = body_jacobian(cu_jp);
+        Eigen::MatrixXd jac = space_jacobian(cu_jp);
         cu_jp += jac.completeOrthogonalDecomposition().pseudoInverse() * v_b;
 
         Eigen::Matrix4d t_sb = fk_solve(cu_jp);
@@ -116,19 +114,18 @@ std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> ScrewsKinematicsSolver:
 Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &current_joint_positions)
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-    auto [m, screws] = space_chain();
-    const int num_joints = joint_count(); //basere DOF på fuknsjonen som brukes
-    screws = m_screws;
+    std::tie(m_m, m_screws) = space_chain();
+    //const int num_joints = screws.size(); //basere DOF på fuknsjonen som brukes
 
     //6x6 jacobian matrix
-    Eigen::MatrixXd jac_space(6, num_joints);
+    Eigen::MatrixXd jac_space(6, joint_count());
     jac_space.setZero();
 
-    for (int i = 0; i < num_joints; i++)
+;
+    for (int i = 0; i < joint_count(); i++)
     {
-        jac_space.col(i) = utility::adjoint_matrix(T) * screws[i];
-
-        T = T * utility::matrix_exponential(screws[i], current_joint_positions[i]);
+        T = T * utility::matrix_exponential(m_screws[i], current_joint_positions[i]);
+        jac_space.col(i) = utility::adjoint_matrix(T) * m_screws[i];
     }
     return jac_space;
 }
@@ -140,13 +137,12 @@ Eigen::MatrixXd ScrewsKinematicsSolver::body_jacobian(const Eigen::VectorXd &cur
     {
         Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
         auto [m, screws] = body_chain();
-        const int num_joints = joint_count(); //basere DOF på fuknsjonen som brukes
-        screws=m_screws;
+        //const int num_joints = screws.size(); //basere DOF på fuknsjonen som brukes
         //6x6 jacobian matrix
-        Eigen::MatrixXd jac_body(6, num_joints);
+        Eigen::MatrixXd jac_body(6, joint_count());
         jac_body.setZero();
 
-        for (int i = num_joints - 1; i != -1; i--)
+        for (int i = joint_count() - 1; i != -1; i--)
         {
             //std::cout << "Screw " << i << ": " << screws[i].transpose() << std::endl;
             jac_body.col(i) = utility::adjoint_matrix(T) * screws[i];

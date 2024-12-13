@@ -29,7 +29,7 @@ Eigen::Vector3d euler_zyx_from_rotation_matrix(const Eigen::Matrix3d &r)
         a = 0.0;
         c = std::atan2(r( 0, 1),  r( 1, 1));
     }
-    else if(is_approx_equal(r(2, 1), 1.0))
+    else if(is_approx_equal(r(2, 0), 1.0))
     {
         b = -EIGEN_PI / 2.0;
         a = 0;
